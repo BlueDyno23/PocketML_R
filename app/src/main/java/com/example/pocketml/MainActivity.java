@@ -1,3 +1,24 @@
+// SUMMARIZE OF THIS BATCH
+/*
+ What needs to be done is:
+    TODO: Clean the code
+
+     VVVVVV MAIN PROBLEM VVVVVV
+    TODO: Get real file path not just URI path
+
+    TODO: Fix the adapter not updating correctly, and fix the debug-delete-button
+    TODO: Create the elements or just scheme out a plan for the Dataset Editor, can use fragments
+    TODO: Make the UI nicer and less debug-ish, can save this for the end
+    TODO: Add the predictor, should be simple.
+
+    TODO: Replan entire model; either find ways to insert parameters into models, try a different library, or do it manually
+
+
+
+ */
+
+
+
 package com.example.pocketml;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -6,7 +27,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -25,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private SharedPreferences sharedPreferences;
 
-    Button btnMainToEditor, btnMainToPredictor, btnMainToModels, btnMainAddDataset;
+    Button btnMainToEditor, btnMainToPredictor, btnMainToModels, btnMainAddDataset, btnDelete;
     ListView lvMain;
 
 
@@ -48,9 +72,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     if (uri != null) {
                         String filePath = uri.getPath();
                         datasetPath.add(filePath);
-                        String fileName = new File(datasetPath.get(datasetPath.size()-1)).getName();
                         datasetsName.add(filePath);
                         SaveDatasetPath(filePath);
+                        Log.d("DATASET!!!!!!!!!!", filePath + " !");
                     }
                 });
 
@@ -62,23 +86,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnMainToPredictor = findViewById(R.id.btnMainToPredictor);
         btnMainToModels = findViewById(R.id.btnMainToModels);
         btnMainAddDataset = findViewById(R.id.btnMainAddDataset);
+        btnDelete = findViewById(R.id.btnMainDeleteDebug);
         lvMain = findViewById(R.id.lvMain);
 
         btnMainToEditor.setOnClickListener(this);
         btnMainToPredictor.setOnClickListener(this);
         btnMainToModels.setOnClickListener(this);
         btnMainAddDataset.setOnClickListener(this);
+        btnDelete.setOnClickListener(this);
 
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, datasetsName);
         lvMain.setAdapter(adapter);
-    }
-
-    private void AddDatasetsToListView(){
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, datasetsName);
-        lvMain.setAdapter(adapter);
-    }
-    private void AddDataset(){
-        filePickerLauncher.launch("*/*");
     }
     private void SaveDatasetPath(String datasetPath) {
         Set<String> datasetPaths = sharedPreferences.getStringSet("dataset_paths", new HashSet<>());
@@ -93,9 +111,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
              datasetPath.add(path);
             String fileName = new File(path).getName();
             datasetsName.add(path);
-            Log.d("Dataset", path);
+            Log.d("DATASET!!!!!!!!!!", path);
         }
+    }
 
+    private void DeleteData(){
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();
+        editor.apply();
+
+        datasetsName.clear();
+        datasetPath.clear();
     }
     @Override
     public void onClick(View view) {
@@ -103,7 +129,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             startActivity(new Intent(this, EditorActivity.class));
         }
         else if(view.getId()==R.id.btnMainAddDataset){
-            AddDataset();
+            filePickerLauncher.launch("*/*");
+        }
+        else if(view.getId()==R.id.btnMainDeleteDebug){
+            DeleteData();
         }
     }
 
@@ -111,6 +140,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
     }
-
 
 }
