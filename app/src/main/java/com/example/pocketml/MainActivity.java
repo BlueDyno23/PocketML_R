@@ -12,75 +12,81 @@
     TODO: Add the predictor, should be simple.
 
     TODO: Replan entire model; either find ways to insert parameters into models, try a different library, or do it manually
-
-
-
  */
-
 
 
 package com.example.pocketml;
 
+import static com.example.pocketml.FileUtils.*;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.os.Environment;
+import android.os.FileUtils;
+import android.provider.DocumentsContract;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener{
-
-    private SharedPreferences sharedPreferences;
-
     Button btnMainToEditor, btnMainToPredictor, btnMainToModels, btnMainAddDataset, btnDelete;
     ListView lvMain;
 
-
-    private ActivityResultLauncher<String> filePickerLauncher;
     ArrayList<String> datasetPath = new ArrayList<>();
     ArrayList<String> datasetsName = new ArrayList<>();
     ArrayAdapter<String> adapter;
+    TextView txt;
+    private ActivityResultLauncher<String> filePickerLauncher;
+
+    String filePath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        sharedPreferences = getPreferences(MODE_PRIVATE);
-
-        InitViews();
-
         filePickerLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(),
                 uri -> {
                     if (uri != null) {
-                        String filePath = uri.getPath();
-                        datasetPath.add(filePath);
-                        datasetsName.add(filePath);
-                        SaveDatasetPath(filePath);
-                        Log.d("DATASET!!!!!!!!!!", filePath + " !");
+                        addDataset(uri);
                     }
                 });
 
-        LoadSavedDatasetPaths();
+        InitializeComponents();
+
+        readFilesFromFolder();
     }
-    private void InitViews() {
+    private void InitializeComponents() {
 
         btnMainToEditor = findViewById(R.id.btnMainToEditor);
         btnMainToPredictor = findViewById(R.id.btnMainToPredictor);
@@ -88,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnMainAddDataset = findViewById(R.id.btnMainAddDataset);
         btnDelete = findViewById(R.id.btnMainDeleteDebug);
         lvMain = findViewById(R.id.lvMain);
+        txt = findViewById(R.id.textView);
 
         btnMainToEditor.setOnClickListener(this);
         btnMainToPredictor.setOnClickListener(this);
@@ -98,31 +105,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, datasetsName);
         lvMain.setAdapter(adapter);
     }
-    private void SaveDatasetPath(String datasetPath) {
-        Set<String> datasetPaths = sharedPreferences.getStringSet("dataset_paths", new HashSet<>());
-        datasetPaths.add(datasetPath);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putStringSet("dataset_paths", datasetPaths);
-        editor.apply();
-    }
-    private void LoadSavedDatasetPaths() {
-        Set<String> datasetPaths = sharedPreferences.getStringSet("dataset_paths", new HashSet<>());
-        for (String path : datasetPaths) {
-             datasetPath.add(path);
-            String fileName = new File(path).getName();
-            datasetsName.add(path);
-            Log.d("DATASET!!!!!!!!!!", path);
-        }
-    }
 
-    private void DeleteData(){
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.clear();
-        editor.apply();
 
-        datasetsName.clear();
-        datasetPath.clear();
-    }
     @Override
     public void onClick(View view) {
         if(view.getId() == R.id.btnMainToEditor){
@@ -132,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             filePickerLauncher.launch("*/*");
         }
         else if(view.getId()==R.id.btnMainDeleteDebug){
-            DeleteData();
+
         }
     }
 
@@ -141,4 +125,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    public void readFilesFromFolder(){
+        List<String> files = getAllFilesInFolder(getApplicationContext());
+        for(String file : files){
+            addDataset(file);
+        }
+    }
+    public void addDataset(String path){
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, datasetsName);
+        lvMain.setAdapter(adapter);
+
+        datasetsName.add(getFileName(this, Uri.parse(path)));
+        datasetPath.add(path);
+    }
+    public void addDataset(Uri uri){
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, datasetsName);
+        lvMain.setAdapter(adapter);
+
+        datasetPath.add(saveFileFromUri(this, uri));
+        datasetsName.add(getFileName(this, uri));
+    }
 }
