@@ -60,6 +60,14 @@ public class FileUtils {
         // Generate a unique destination file path
         String destinationFilePath = destinationPath + File.separator + fileName;
 
+        for (String s: getAllFilesInFolder(context)) {
+            if(s.equals(destinationFilePath)){
+                Log.e("FileUtil", "File already exists");
+                return null;
+            }
+        }
+
+        Log.e("FileUtil", "Its ok");
         // Copy the file to the app folder
         try {
             InputStream inputStream = context.getContentResolver().openInputStream(uri);

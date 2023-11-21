@@ -14,30 +14,17 @@
     TODO: Replan entire model; either find ways to insert parameters into models, try a different library, or do it manually
  */
 
-
 package com.example.pocketml;
 
 import static com.example.pocketml.FileUtils.*;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.FileUtils;
-import android.provider.DocumentsContract;
-import android.provider.OpenableColumns;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -46,25 +33,16 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener{
     Button btnMainToEditor, btnMainToPredictor, btnMainToModels, btnMainAddDataset, btnDelete;
     ListView lvMain;
 
-    ArrayList<String> datasetPath = new ArrayList<>();
-    ArrayList<String> datasetsName = new ArrayList<>();
-    ArrayAdapter<String> adapter;
+    ArrayList<String> datasetPathArray = new ArrayList<>();
+    ArrayList<String> datasetNameArray = new ArrayList<>();
+    ArrayAdapter<String> adapterName;
     TextView txt;
     private ActivityResultLauncher<String> filePickerLauncher;
 
@@ -84,7 +62,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         InitializeComponents();
 
-        readFilesFromFolder();
+        if(getAllFilesInFolder(getApplicationContext()).size() > 0){
+            readFilesFromFolder();
+        }
     }
     private void InitializeComponents() {
 
@@ -102,8 +82,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnMainAddDataset.setOnClickListener(this);
         btnDelete.setOnClickListener(this);
 
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, datasetsName);
-        lvMain.setAdapter(adapter);
+        adapterName = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, datasetNameArray);
+        lvMain.setAdapter(adapterName);
     }
 
 
@@ -119,7 +99,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }
     }
-
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
@@ -128,21 +107,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void readFilesFromFolder(){
         List<String> files = getAllFilesInFolder(getApplicationContext());
         for(String file : files){
-            addDataset(file);
-        }
-    }
-    public void addDataset(String path){
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, datasetsName);
-        lvMain.setAdapter(adapter);
+            //addDatasetToLists(file);
+            //Toast.makeText(this, file, Toast.LENGTH_SHORT).show();
 
-        datasetsName.add(getFileName(this, Uri.parse(path)));
-        datasetPath.add(path);
+            datasetNameArray.add(getFileName(getApplicationContext(), Uri.parse(file)));
+            datasetPathArray.add(file);
+
+            adapterName.notifyDataSetChanged();
+        }
+
+        adapterName.notifyDataSetChanged();
+    }
+
+
+    public void addDatasetToLists(String path){
+        datasetNameArray.add(getFileName(getApplicationContext(), Uri.parse(path)));
+        datasetPathArray.add(path);
+
+        adapterName.notifyDataSetChanged();
     }
     public void addDataset(Uri uri){
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, datasetsName);
-        lvMain.setAdapter(adapter);
+        String s = saveFileFromUri(getApplicationContext(), uri);
+        if(s!=null){
+            datasetPathArray.add(s);
+            datasetNameArray.add(getFileName(this, uri));
+        }
 
-        datasetPath.add(saveFileFromUri(this, uri));
-        datasetsName.add(getFileName(this, uri));
+        adapterName.notifyDataSetChanged();
     }
 }
