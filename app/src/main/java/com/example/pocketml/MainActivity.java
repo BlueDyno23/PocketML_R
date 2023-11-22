@@ -81,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnMainToModels.setOnClickListener(this);
         btnMainAddDataset.setOnClickListener(this);
         btnDelete.setOnClickListener(this);
+        lvMain.setOnItemClickListener(this);
 
         adapterName = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, datasetNameArray);
         lvMain.setAdapter(adapterName);
@@ -96,35 +97,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             filePickerLauncher.launch("*/*");
         }
         else if(view.getId()==R.id.btnMainDeleteDebug){
-
+            refreshLists();
         }
     }
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
+        Toast.makeText(this, datasetPathArray.get(i), Toast.LENGTH_SHORT).show();
     }
 
     public void readFilesFromFolder(){
         List<String> files = getAllFilesInFolder(getApplicationContext());
         for(String file : files){
-            //addDatasetToLists(file);
-            //Toast.makeText(this, file, Toast.LENGTH_SHORT).show();
-
-            datasetNameArray.add(getFileName(getApplicationContext(), Uri.parse(file)));
-            datasetPathArray.add(file);
-
-            adapterName.notifyDataSetChanged();
+            addDatasetToLists(file);
+            Toast.makeText(this, file, Toast.LENGTH_SHORT).show();
         }
 
         adapterName.notifyDataSetChanged();
+        refreshLists();
     }
 
 
     public void addDatasetToLists(String path){
-        datasetNameArray.add(getFileName(getApplicationContext(), Uri.parse(path)));
         datasetPathArray.add(path);
+        datasetNameArray.add(getFileName(getApplicationContext(), Uri.parse(path)));
 
         adapterName.notifyDataSetChanged();
+    }
+
+    private void refreshLists(){
+        datasetNameArray.clear();
+        datasetPathArray.clear();
+        getApplicationContext().getFilesDir().delete();
+
+        adapterName.notifyDataSetChanged();
+
     }
     public void addDataset(Uri uri){
         String s = saveFileFromUri(getApplicationContext(), uri);
@@ -132,7 +138,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             datasetPathArray.add(s);
             datasetNameArray.add(getFileName(this, uri));
         }
-
         adapterName.notifyDataSetChanged();
     }
 }
