@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             filePickerLauncher.launch("*/*");
         }
         else if(view.getId()==R.id.btnMainDeleteDebug){
-            refreshLists();
+            deleteLists();
         }
     }
     @Override
@@ -113,18 +113,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         adapterName.notifyDataSetChanged();
-        refreshLists();
+        //deleteLists();
     }
 
 
     public void addDatasetToLists(String path){
         datasetPathArray.add(path);
-        datasetNameArray.add(getFileName(getApplicationContext(), Uri.parse(path)));
+        datasetNameArray.add(getFileName(path));
 
-        adapterName.notifyDataSetChanged();
+        txt.setText("datasetNameArray at 0: "+datasetNameArray.get(0) +" count:");
     }
 
-    private void refreshLists(){
+    private void deleteLists(){
         datasetNameArray.clear();
         datasetPathArray.clear();
         getApplicationContext().getFilesDir().delete();
