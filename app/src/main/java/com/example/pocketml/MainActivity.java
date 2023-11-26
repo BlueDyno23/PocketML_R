@@ -33,6 +33,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,9 +41,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button btnMainToEditor, btnMainToPredictor, btnMainToModels, btnMainAddDataset, btnDelete;
     ListView lvMain;
 
-    ArrayList<String> datasetPathArray = new ArrayList<>();
-    ArrayList<String> datasetNameArray = new ArrayList<>();
-    ArrayAdapter<String> adapterName;
+    ArrayList<DatasetModel> datasetArray = new ArrayList<>();
+    ArrayAdapter<DatasetModel> adapterName;
     TextView txt;
     private ActivityResultLauncher<String> filePickerLauncher;
 
@@ -55,8 +55,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         filePickerLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(),
                 uri -> {
-                    if (uri != null) {
+                    if (getFileName(this, uri) != null && getFileName(this, uri).toLowerCase().endsWith(".csv")) {
                         addDataset(uri);
+                    } else {
+                        Toast.makeText(this, "Please select a CSV file", Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -83,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnDelete.setOnClickListener(this);
         lvMain.setOnItemClickListener(this);
 
-        adapterName = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, datasetNameArray);
+        adapterName = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, datasetArray);
         lvMain.setAdapter(adapterName);
     }
 
@@ -102,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        Toast.makeText(this, datasetPathArray.get(i), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, datasetArray.get(i).getDatasetPath(), Toast.LENGTH_SHORT).show();
     }
 
     public void readFilesFromFolder(){
@@ -118,26 +120,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     public void addDatasetToLists(String path){
-        datasetPathArray.add(path);
-        datasetNameArray.add(getFileName(path));
 
-        txt.setText("datasetNameArray at 0: "+datasetNameArray.get(0) +" count:");
-    }
+        datasetArray.add(new DatasetModel(path, getFileName(path)));
 
-    private void deleteLists(){
-        datasetNameArray.clear();
-        datasetPathArray.clear();
-        getApplicationContext().getFilesDir().delete();
-
-        adapterName.notifyDataSetChanged();
-
+        txt.setText("datasetNameArray at 0: "+datasetArray.get(0).toString() +" count:");
     }
     public void addDataset(Uri uri){
         String s = saveFileFromUri(getApplicationContext(), uri);
         if(s!=null){
-            datasetPathArray.add(s);
-            datasetNameArray.add(getFileName(this, uri));
+            datasetArray.add(new DatasetModel(s, getFileName(this, uri)));
         }
+        adapterName.notifyDataSetChanged();
+    }
+
+    private void deleteLists(){
+        for (DatasetModel dataset : datasetArray) {
+            File file = new File(dataset.getDatasetPath());
+            file.delete();
+        }
+
+        datasetArray.clear();
         adapterName.notifyDataSetChanged();
     }
 }

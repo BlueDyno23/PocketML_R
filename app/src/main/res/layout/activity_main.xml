@@ -51,13 +51,14 @@
             android:layout_weight="1"
             android:layout_margin="8sp"
             android:text="Add Dataset"/>
+
         <Button
             android:id="@+id/btnMainDeleteDebug"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
             android:layout_margin="8sp"
-            android:text="(debug) delete sharedpreferences"/>
+            android:layout_weight="1"
+            android:text="[DEBUG]\nDelete files" />
     </LinearLayout>
 
     <TextView
