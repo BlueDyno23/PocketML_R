@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class DatasetManager {
     private static DatasetManager _instance;
-    private ArrayList<DatasetModel> datasets;
+    private ArrayList<DatasetModel> datasets = new ArrayList<>();
 
     public static DatasetManager getInstance(){
         if(_instance == null){
