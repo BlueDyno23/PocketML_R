@@ -1,4 +1,4 @@
-package com.example.pocketml;
+package com.example.pocketml.Utilities;
 
 import android.content.Context;
 import android.database.Cursor;

@@ -1,4 +1,4 @@
-package com.example.pocketml;
+package com.example.pocketml.Weka;
 
 import java.io.File;
 import java.io.IOException;

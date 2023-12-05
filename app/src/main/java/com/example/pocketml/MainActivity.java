@@ -16,7 +16,7 @@
 
 package com.example.pocketml;
 
-import static com.example.pocketml.FileUtils.*;
+import static com.example.pocketml.Utilities.FileUtils.*;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -32,6 +32,9 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.pocketml.Dataset.DatasetManager;
+import com.example.pocketml.Dataset.DatasetModel;
 
 import java.io.File;
 import java.util.ArrayList;
