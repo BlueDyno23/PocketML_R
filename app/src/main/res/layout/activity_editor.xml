@@ -7,9 +7,17 @@
     tools:context=".EditorActivity"
     android:orientation="vertical"
     android:padding="20sp">
-
-   <TableLayout
-       android:id="@+id/editorTable"
+   <ScrollView
        android:layout_width="match_parent"
-       android:layout_height="500dp"/>
+       android:layout_height="250dp">
+      <HorizontalScrollView
+          android:layout_width="match_parent"
+          android:layout_height="match_parent">
+         <TableLayout
+             android:id="@+id/editorTable"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:isScrollContainer="true" />
+      </HorizontalScrollView>
+   </ScrollView>
 </LinearLayout>
